@@ -9,8 +9,8 @@
 //C++
 #include <iostream>
 #include <sstream>
-
-#include "Parking_lot.h"
+//own
+#include "Utils.h"
 
 
 using namespace cv;
@@ -30,13 +30,13 @@ bool stop = false;
 
 void processVideo(char* videoFilename);
 bool handleKeyPress(char k);
-void filterBlack(const Mat& image, const Mat& imageGray, Mat& imageGrayNew, double grayValue);
+void filterBlack(const Mat& image, Mat& imageGrayNew, double grayValue);
 
 int main(int argc, char* argv[])
 {
 	Parking_lot p(shapes::Point(522, 272), shapes::Point(560, 299), shapes::Point(835, 307), shapes::Point(835, 280));
 
-
+	
 	if (argc != 2) {
 		cerr << "Incorret input list!" << endl;
 		cerr << "exiting..." << endl;
@@ -70,7 +70,7 @@ void processVideo(char* videoFilename) {
 		exit(EXIT_FAILURE);
 	}
 
-	//read input data. ESC(27)
+	//read input data
 	keyboard = 0;
 	
 	Mat grayNew = Mat::zeros(H, W, CV_8UC1);
@@ -83,9 +83,12 @@ void processVideo(char* videoFilename) {
 			exit(EXIT_FAILURE);
 		}
 		cvtColor(frame, gray, COLOR_RGB2GRAY);
-		filterBlack(frame, gray, grayNew, 120);
+		filterBlack(frame, grayNew, 168);
+
+		std::cout << "start drawing" << std::endl;
+		drawOnRectangles(frame, 0, 5);
 		//show the current frame
-		imshow("Frame", grayNew);
+		imshow("Frame", frame);
 		//get the input from the keyboard
 		keyboard = (char)waitKey(30);
 
@@ -100,6 +103,8 @@ void processVideo(char* videoFilename) {
 }
 
 
+/* Returns true if we should close the app (ESC pressed).
+   If space is pressed, then pause the processing and wait until space is pressed again. */
 bool handleKeyPress(char k) {
 	// 32 == Space ,    27 == ESC
 	if (k == 32 || steppedPlay){

@@ -1,13 +1,15 @@
 #pragma once
-
+//opencv
+#include <opencv2/shape.hpp>
+//C++
 #include <ctime>
 
 namespace shapes {
 
 	class Point {
 	public:
-		float x, y;
-		Point(float x = 0, float y = 0) {
+		int x, y;
+		Point(int x = 0, int y = 0) {
 			this->x = x;
 			this->y = y;
 		}
@@ -15,12 +17,25 @@ namespace shapes {
 			x = other.x;
 			y = other.y;
 		}
+		operator cv::Point() {
+			return cv::Point(x,y);
+		}
+		int operator[] (int index) {
+			if (index < 0 || index > 1)
+				throw "Index out of range";
+			else {
+				if (index == 0)
+					return x;
+				else
+					return y;
+			}
+		}
 	};
 
 	class Rect {
 	public:
 		Point corners[4];
-		float minx, maxx, miny, maxy;
+		double minx, maxx, miny, maxy;
 		Rect() {
 			init(Point(), Point(), Point(), Point());
 		}
@@ -47,6 +62,12 @@ namespace shapes {
 			maxy = corners[1].x;
 			if (corners[2].x > maxy)
 				maxy = corners[2].x;
+		}
+		Point operator[] (int index) {
+			if (index < 0 || index > 3)
+				throw "Index out of range";
+			else
+				return corners[index];
 		}
 	};
 }

@@ -20,7 +20,7 @@ if len(sys.argv) < 2:
 	print 'Usage: "python deviation.py 2"'
 
 videoIndex = sys.argv[1]
-v="../vids/"+str(videoIndex)+".mp4"
+v="C:/Users/Marci/Desktop/Smart City/Park Detect//vids/"+str(videoIndex)+".mp4"
 vidcap = cv2.VideoCapture(v)
 
 ret, im = vidcap.read()
@@ -36,7 +36,7 @@ maskAsphalt = np.zeros((H,W), np.uint8)
 rectangleA = np.array([asphalt.corner1,asphalt.corner2,asphalt.corner3,asphalt.corner4], np.int32)
 cv2.fillConvexPoly(maskAsphalt, rectangleA, 255)
 
-background = cv2.imread('../bg.jpg')
+background = cv2.imread('C:/Users/Marci/Desktop/Smart City/Park Detect/bg.jpg')
 background_gray = cv2.cvtColor(background, cv2.COLOR_RGB2GRAY)
 
 # create video output
@@ -67,20 +67,23 @@ while(True):
 
 	diffFromBlack_thresh = filterBlack(image, imageGray, value)
 	print format_string(meanAs)
+        image = cv2.resize(diffFromBlack_thresh,(640,360))
+	cv2.imshow('original', diffFromBlack_thresh)
+	cv2.moveWindow("original", 0,0)
 
 	# calc graph
-	calcPercentages(diffFromBlack_thresh, diff)
+	#calcPercentages(diffFromBlack_thresh, diff)
         # calc occupied spots
-	calibrateSpots(image)
+	#calibrateSpots(image)
 
         # show every 5th rectangle
         #diffFromBlack_thresh = cv2.cvtColor(diffFromBlack_thresh, cv2.COLOR_GRAY2RGB)
 	#drawOnRectangles(diffFromBlack_thresh,0,5)
 
         #out.write(image)
-	image = cv2.resize(image,(640,360))
-	cv2.imshow('original', image)
-	cv2.moveWindow("original", 0,0)
+	#image = cv2.resize(image,(640,360))
+	#cv2.imshow('original', image)
+	#cv2.moveWindow("original", 0,0)
 
 	#thresh2show = cv2.resize(diffFromBlack_thresh,(640,360))
 	#cv2.imshow('shadow based', thresh2show)
