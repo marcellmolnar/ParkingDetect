@@ -10,31 +10,10 @@ shapes::Point parking_zone_up[] = { shapes::Point(80, 272), shapes::Point(147, 2
 uint16_t parking_zone_down_LENGTH = 19;
 shapes::Point parking_zone_down[] = { shapes::Point(66, 284), shapes::Point(90, 287), shapes::Point(126, 283), shapes::Point(152, 282), shapes::Point(182, 281), shapes::Point(226, 282), shapes::Point(263, 279), shapes::Point(301, 281), shapes::Point(358, 281), shapes::Point(412, 277), shapes::Point(479, 277), shapes::Point(556, 276), shapes::Point(609, 272), shapes::Point(662, 271), shapes::Point(735, 273), shapes::Point(802, 273), shapes::Point(887, 278), shapes::Point(971, 282), shapes::Point(1021, 280) };
 
-void filterBlack(const Mat& image, Mat& imageGrayNew, double grayValue){
-	
-	int channels = image.channels();
-	int nRows = image.rows;
-	int nCols = image.cols;
-	int i, j;
-	cv::Vec3b* p;
-	for (i = 0; i < nRows; ++i)	{
-		for (j = 0; j < nCols; ++j)	{
-			p = imageGrayNew.ptr<cv::Vec3b>(i);
-			double maxVal = image.at<cv::Vec3b>(i, j)[0];
-			if (maxVal < image.at<cv::Vec3b>(i, j)[1])
-				maxVal = image.at<cv::Vec3b>(i, j)[1];
-			if (maxVal < image.at<cv::Vec3b>(i, j)[2])
-				maxVal = image.at<cv::Vec3b>(i, j)[2];
-			if (maxVal < 255-grayValue) {
-				p[j] = 255;
-			}
-			else {
-				p[j] = 0;
-			}
-			
-		}
-	}
-	
+void filterBlack(const Mat& imageHSV, Mat& imageGrayNew, double grayValue){
+	Mat channels[3];
+	split(imageHSV, channels);
+	threshold(channels[2], imageGrayNew, double(255)-grayValue, 255, THRESH_BINARY_INV);
 }
 
 shapes::Rect getRect(double x, double width) {
@@ -46,40 +25,40 @@ shapes::Rect getRect(double x, double width) {
 	while (index < parking_zone_down_LENGTH - 1 and parking_zone_down[index][0] < x - width / 2 + slide)
 		index += 1;
 	double rate2 = double((parking_zone_down[index][0] - x + width / 2 - slide)) / (parking_zone_down[index][0] - parking_zone_down[index - 1][0]);
-	int corner2 = (x - width / 2 + slide, int(parking_zone_down[index][1] + (parking_zone_down[index - 1][1] - parking_zone_down[index][1])*rate2));
+	shapes::Point corner2(x - width / 2 + slide, int(parking_zone_down[index][1] + (parking_zone_down[index - 1][1] - parking_zone_down[index][1])*rate2));
 
 	while (index < parking_zone_down_LENGTH - 1 and parking_zone_down[index][0] < x + width / 2 + slide)
 		index += 1;
 	double rate3 = double((parking_zone_down[index][0] - x - width / 2 - slide)) / (parking_zone_down[index][0] - parking_zone_down[index - 1][0]);
-	int corner3 = (x + width / 2 + slide, int(parking_zone_down[index][1] + (parking_zone_down[index - 1][1] - parking_zone_down[index][1])*rate3));
+	shapes::Point corner3(x + width / 2 + slide, int(parking_zone_down[index][1] + (parking_zone_down[index - 1][1] - parking_zone_down[index][1])*rate3));
 
 
 	index = 1;
 	while (index < parking_zone_up_LENGTH - 1 and parking_zone_up[index][0] < x - width / 2 - slide)
 		index += 1;
 	double rate1 = double((parking_zone_up[index][0] - x + width / 2 + slide)) / (parking_zone_up[index][0] - parking_zone_up[index - 1][0]);
-	int corner1 = (x - width / 2 - slide, int(parking_zone_up[index][1] + (parking_zone_up[index - 1][1] - parking_zone_up[index][1])*rate1));
+	shapes::Point corner1(x - width / 2 - slide, int(parking_zone_up[index][1] + (parking_zone_up[index - 1][1] - parking_zone_up[index][1])*rate1));
 
 	while (index < parking_zone_up_LENGTH - 1 and parking_zone_up[index][0] < x + width / 2 - slide)
 		index += 1;
 	double rate4 = double((parking_zone_up[index][0] - x - width / 2 + slide)) / (parking_zone_up[index][0] - parking_zone_up[index - 1][0]);
-	int corner4 = (x + width / 2 - slide, int(parking_zone_up[index][1] + (parking_zone_up[index - 1][1] - parking_zone_up[index][1])*rate4));
+	shapes::Point corner4(x + width / 2 - slide, int(parking_zone_up[index][1] + (parking_zone_up[index - 1][1] - parking_zone_up[index][1])*rate4));
 	
 	shapes::Rect rect = shapes::Rect(corner1, corner2, corner3, corner4);
 	return rect;
 
 };
 
-void draw_rectangle_on_image(Mat& image, shapes::Rect rect, Scalar color, uint8_t width = 2) {
+void draw_rectangle_on_image(Mat& image, shapes::Rect rect, Scalar color, int width = 2) {
 	line(image, rect[0], rect[1], color, width);
 	line(image, rect[1], rect[2], color, width);
 	line(image, rect[2], rect[3], color, width);
 	line(image, rect[3], rect[0], color, width);
 };
 
-void drawOnRectangles(Mat& image, uint16_t start, uint16_t diff) {
+void drawOnRectangles(Mat& image, int start, int diff) {
 	double currX = 950 - start * 10;
-	uint16_t i = start;
+	int i = start;
 	if (i < 0)
 		i = 0;
 	if (diff < 5)
@@ -87,11 +66,10 @@ void drawOnRectangles(Mat& image, uint16_t start, uint16_t diff) {
 	while (currX > 60) {
 		//std::cout << i << std::endl;
 		//std::cout << "ok" << std::endl;
-		//shapes::Rect rect = getRect(currX, 50);
+		shapes::Rect rect = getRect(currX, 50);
 		currX -= 10 * diff;
-		//draw_rectangle_on_image(image, rect, Scalar(0, 0, 255));
+		draw_rectangle_on_image(image, rect, Scalar(0, 0, 255));
 		i += diff;
 	}
-	std::cout << i << std::endl;
 }
 

@@ -16,10 +16,10 @@
 using namespace cv;
 using namespace shapes;
 
-void filterBlack(const Mat& image, Mat& imageGrayNew, double grayValue);
+void filterBlack(const Mat&, Mat&, double);
 
-shapes::Rect getRect(double x, double width);
+shapes::Rect getRect(double, double);
 
-void draw_rectangle_on_image(Mat& image, shapes::Rect rect, Scalar color, uint8_t width);
+void draw_rectangle_on_image(Mat&, shapes::Rect, Scalar, int);
 
-void drawOnRectangles(Mat& image, uint16_t start, uint16_t diff);
+void drawOnRectangles(Mat&, int, int);

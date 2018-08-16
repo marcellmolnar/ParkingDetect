@@ -20,13 +20,11 @@ using namespace std;
 Mat frame, gray;
 Mat background;
 Mat background_gray;
-char keyboard;
 
 uint16_t H = 720;
 uint16_t W = 1280;
 
 bool steppedPlay = false;
-bool stop = false;
 
 void processVideo(char* videoFilename);
 bool handleKeyPress(char k);
@@ -34,9 +32,11 @@ void filterBlack(const Mat& image, Mat& imageGrayNew, double grayValue);
 
 int main(int argc, char* argv[])
 {
-	Parking_lot p(shapes::Point(522, 272), shapes::Point(560, 299), shapes::Point(835, 307), shapes::Point(835, 280));
+	std::cout << "app started" << std::endl;
+	steppedPlay = false;
 
-	
+	Parking_lot p(shapes::Point(522, 272), shapes::Point(560, 299), shapes::Point(835, 307), shapes::Point(835, 280));
+		
 	if (argc != 2) {
 		cerr << "Incorret input list!" << endl;
 		cerr << "exiting..." << endl;
@@ -50,9 +50,11 @@ int main(int argc, char* argv[])
 		cerr << "exiting..." << endl;
 		return EXIT_FAILURE;
 	}
-	cvtColor(background, background_gray, COLOR_RGB2GRAY);
+	std::cout << "bckgnd opened" << std::endl;
+	cvtColor(background, background_gray, COLOR_BGR2GRAY);
 
 	namedWindow("Frame");
+	std::cout << "window created" << std::endl;
 
 	processVideo(argv[1]);
 
@@ -69,28 +71,36 @@ void processVideo(char* videoFilename) {
 		cerr << "Unable to open video file: " << videoFilename << endl;
 		exit(EXIT_FAILURE);
 	}
+	std::cout << "video opened: " << videoFilename << std::endl;
 
 	//read input data
-	keyboard = 0;
+	char keyboard = 0;
+	bool stop = false;
 	
 	Mat grayNew = Mat::zeros(H, W, CV_8UC1);
-
+	Mat imageHSV = Mat::zeros(H, W, CV_8UC3);
+	
+	std::cout << "starting video processing" << std::endl;
 	while (!stop && keyboard != 27) {
 		//read the current frame
 		if (!capture.read(frame)) {
 			cerr << "Unable to read next frame." << endl;
-			cerr << "Exiting..." << endl;
-			exit(EXIT_FAILURE);
+			break;
 		}
-		cvtColor(frame, gray, COLOR_RGB2GRAY);
-		filterBlack(frame, grayNew, 168);
+		
+		cvtColor(frame, imageHSV, COLOR_BGR2HSV);
+		filterBlack(imageHSV, grayNew, 168);
 
-		std::cout << "start drawing" << std::endl;
-		drawOnRectangles(frame, 0, 5);
+		//std::cout << "start drawing" << std::endl;
+		//drawOnRectangles(frame, 0, 5);
+		
 		//show the current frame
-		imshow("Frame", frame);
+		imshow("Frame", grayNew);
+		std::cout << "image showed" << std::endl;
+
 		//get the input from the keyboard
-		keyboard = (char)waitKey(30);
+		keyboard = (char) waitKey(30);
+		std::cout << "keyboard read" << std::endl;
 
 		stop = handleKeyPress(keyboard);
 		if (keyboard == 27) {
@@ -98,8 +108,10 @@ void processVideo(char* videoFilename) {
 		}
 	}
 
+	std::cout << "end of video processing" << std::endl;
 	//delete capture object
 	capture.release();
+	std::cout << "video released" << std::endl;
 }
 
 
@@ -146,5 +158,20 @@ ss << capture.get(CAP_PROP_POS_FRAMES);
 string frameNumberString = ss.str();
 putText(frame, frameNumberString.c_str(), cv::Point(15, 15),
 FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+
+*/
+
+
+/*
+   // ######## Determine image type: rgb or bgr
+   
+   Mat ch1, ch2, ch3; // declare three matrices
+   // "channels" is a vector of 3 Mat arrays:
+   vector<Mat> channels(3);
+   // split frame:
+   split(frame, channels);
+   channels[1] = Mat::zeros(H, W, CV_8UC1);
+   channels[2] = Mat::zeros(H, W, CV_8UC1);
+   merge(channels, frame);
 
 */
