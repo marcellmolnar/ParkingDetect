@@ -64,9 +64,10 @@ while(True):
 		value = meanAs*3/4
 	# value for differentiation
 	value = meanAs/2
+	print format_string(meanAs)
+	print format_string(value)
 
 	diffFromBlack_thresh = filterBlack(image, imageGray, value)
-	print format_string(meanAs)
         image = cv2.resize(diffFromBlack_thresh,(640,360))
 	cv2.imshow('original', diffFromBlack_thresh)
 	cv2.moveWindow("original", 0,0)

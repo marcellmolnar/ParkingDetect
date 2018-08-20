@@ -150,11 +150,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="detectCars.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parking_lot.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="detectCars.h" />
+    <ClInclude Include="constants.h" />
     <ClInclude Include="Parking_lot.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>

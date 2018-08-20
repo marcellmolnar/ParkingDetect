@@ -18,6 +18,8 @@ using namespace shapes;
 
 void filterBlack(const Mat&, Mat&, double);
 
+double meanOfArea(const Mat&, const Mat&, double&, double& );
+
 shapes::Rect getRect(double, double);
 
 void draw_rectangle_on_image(Mat&, shapes::Rect, Scalar, int);

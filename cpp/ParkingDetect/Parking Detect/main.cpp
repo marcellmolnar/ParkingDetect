@@ -79,6 +79,16 @@ void processVideo(char* videoFilename) {
 	
 	Mat grayNew = Mat::zeros(H, W, CV_8UC1);
 	Mat imageHSV = Mat::zeros(H, W, CV_8UC3);
+	Mat imageGray = Mat::zeros(H, W, CV_8UC3);
+
+	// Mask for the asphalt
+	vector<cv::Point> points;
+	points.push_back(cv::Point(522, 272));
+	points.push_back(cv::Point(560, 299));
+	points.push_back(cv::Point(835, 307));
+	points.push_back(cv::Point(835, 280));
+	Mat maskAsphalt = Mat::zeros(H, W, CV_8UC1);
+	fillConvexPoly(maskAsphalt, points, Scalar(255), CV_AA, 0);
 	
 	std::cout << "starting video processing" << std::endl;
 	while (!stop && keyboard != 27) {
@@ -87,20 +97,20 @@ void processVideo(char* videoFilename) {
 			cerr << "Unable to read next frame." << endl;
 			break;
 		}
-		
+
+		cvtColor(frame, imageGray, COLOR_BGR2GRAY);
+		double mean, dev;
+		meanOfArea(background_gray, maskAsphalt, mean, dev);
+		std::cout << mean << " " << dev << std::endl;
+
 		cvtColor(frame, imageHSV, COLOR_BGR2HSV);
 		filterBlack(imageHSV, grayNew, 168);
-
-		//std::cout << "start drawing" << std::endl;
-		//drawOnRectangles(frame, 0, 5);
 		
 		//show the current frame
-		imshow("Frame", grayNew);
-		std::cout << "image showed" << std::endl;
+		imshow("Frame", background);
 
 		//get the input from the keyboard
 		keyboard = (char) waitKey(30);
-		std::cout << "keyboard read" << std::endl;
 
 		stop = handleKeyPress(keyboard);
 		if (keyboard == 27) {

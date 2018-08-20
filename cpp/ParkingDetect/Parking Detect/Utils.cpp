@@ -16,6 +16,27 @@ void filterBlack(const Mat& imageHSV, Mat& imageGrayNew, double grayValue){
 	threshold(channels[2], imageGrayNew, double(255)-grayValue, 255, THRESH_BINARY_INV);
 }
 
+double meanOfArea(const Mat& imageGray, const Mat& maskAsphalt, double& m, double& d) {
+	//Mat image_masked;
+	//bitwise_and(imageGray, imageGray, image_masked, maskAsphalt);
+	//imshow("Frame2", image_masked);
+
+	Mat mean, stddev;
+	meanStdDev(imageGray, mean, stddev, maskAsphalt);
+	double meanval = mean.data[0];
+	double stddevval = stddev.data[0];
+	int imageSize = 1280 * 720;
+	int areaSize = countNonZero(maskAsphalt);
+	m = meanval;
+	d = stddevval;
+	if (areaSize != 0) {
+		//double sumSquare = (stddevval*stddevval + meanval*meanval)*imageSize / areaSize;
+		return stddevval;// *imageSize / areaSize;
+	}
+	else
+		return 140;
+}
+
 shapes::Rect getRect(double x, double width) {
 	double scale = 1 - 0.8*(1030 - x) / (1030 - 60);
 
