@@ -1,5 +1,8 @@
 #pragma once
 
+const uint16_t H = 720;
+const uint16_t W = 1280;
+
 const int START_POINT = 950;
 const int END_POINT = 60;
 const int STEP_SIZE = 10;

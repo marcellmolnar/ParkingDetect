@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Utils.h"
+#include "constants.h"
 
 using namespace cv;
 using namespace shapes;
@@ -16,25 +17,11 @@ void filterBlack(const Mat& imageHSV, Mat& imageGrayNew, double grayValue){
 	threshold(channels[2], imageGrayNew, double(255)-grayValue, 255, THRESH_BINARY_INV);
 }
 
-double meanOfArea(const Mat& imageGray, const Mat& maskAsphalt, double& m, double& d) {
-	//Mat image_masked;
-	//bitwise_and(imageGray, imageGray, image_masked, maskAsphalt);
-	//imshow("Frame2", image_masked);
-
-	Mat mean, stddev;
+double meanOfArea(const Mat& imageGray, const Mat& maskAsphalt) {
+	Scalar mean, stddev;
 	meanStdDev(imageGray, mean, stddev, maskAsphalt);
-	double meanval = mean.data[0];
-	double stddevval = stddev.data[0];
-	int imageSize = 1280 * 720;
-	int areaSize = countNonZero(maskAsphalt);
-	m = meanval;
-	d = stddevval;
-	if (areaSize != 0) {
-		//double sumSquare = (stddevval*stddevval + meanval*meanval)*imageSize / areaSize;
-		return stddevval;// *imageSize / areaSize;
-	}
-	else
-		return 140;
+	double meanval = mean.val[0];
+	return meanval;	
 }
 
 shapes::Rect getRect(double x, double width) {

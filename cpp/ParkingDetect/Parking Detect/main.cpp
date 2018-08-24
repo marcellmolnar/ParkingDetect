@@ -11,6 +11,7 @@
 #include <sstream>
 //own
 #include "Utils.h"
+#include "constants.h"
 
 
 using namespace cv;
@@ -20,9 +21,6 @@ using namespace std;
 Mat frame, gray;
 Mat background;
 Mat background_gray;
-
-uint16_t H = 720;
-uint16_t W = 1280;
 
 bool steppedPlay = false;
 
@@ -89,7 +87,7 @@ void processVideo(char* videoFilename) {
 	points.push_back(cv::Point(835, 280));
 	Mat maskAsphalt = Mat::zeros(H, W, CV_8UC1);
 	fillConvexPoly(maskAsphalt, points, Scalar(255), CV_AA, 0);
-	
+
 	std::cout << "starting video processing" << std::endl;
 	while (!stop && keyboard != 27) {
 		//read the current frame
@@ -99,15 +97,14 @@ void processVideo(char* videoFilename) {
 		}
 
 		cvtColor(frame, imageGray, COLOR_BGR2GRAY);
-		double mean, dev;
-		meanOfArea(background_gray, maskAsphalt, mean, dev);
-		std::cout << mean << " " << dev << std::endl;
+		double mean = meanOfArea(imageGray, maskAsphalt);
+		std::cout << mean << std::endl;
 
 		cvtColor(frame, imageHSV, COLOR_BGR2HSV);
-		filterBlack(imageHSV, grayNew, 168);
+		filterBlack(imageHSV, grayNew, mean/2);
 		
 		//show the current frame
-		imshow("Frame", background);
+		imshow("Frame", frame);
 
 		//get the input from the keyboard
 		keyboard = (char) waitKey(30);

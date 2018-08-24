@@ -66,7 +66,7 @@ while(True):
 	value = meanAs/2
 	print format_string(meanAs)
 	print format_string(value)
-
+        
 	diffFromBlack_thresh = filterBlack(image, imageGray, value)
         image = cv2.resize(diffFromBlack_thresh,(640,360))
 	cv2.imshow('original', diffFromBlack_thresh)

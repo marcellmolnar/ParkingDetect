@@ -18,7 +18,7 @@ using namespace shapes;
 
 void filterBlack(const Mat&, Mat&, double);
 
-double meanOfArea(const Mat&, const Mat&, double&, double& );
+double meanOfArea(const Mat&, const Mat&);
 
 shapes::Rect getRect(double, double);
 
