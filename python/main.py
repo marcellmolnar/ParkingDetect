@@ -68,23 +68,23 @@ while(True):
 	print format_string(value)
         
 	diffFromBlack_thresh = filterBlack(image, imageGray, value)
-        image = cv2.resize(diffFromBlack_thresh,(640,360))
-	cv2.imshow('original', diffFromBlack_thresh)
-	cv2.moveWindow("original", 0,0)
+        #image = cv2.resize(diffFromBlack_thresh,(640,360))
+	#cv2.imshow('original', diffFromBlack_thresh)
+	#cv2.moveWindow("original", 0,0)
 
 	# calc graph
-	#calcPercentages(diffFromBlack_thresh, diff)
+	calcPercentages(diffFromBlack_thresh, diff)
         # calc occupied spots
-	#calibrateSpots(image)
+	calibrateSpots(image)
 
         # show every 5th rectangle
         #diffFromBlack_thresh = cv2.cvtColor(diffFromBlack_thresh, cv2.COLOR_GRAY2RGB)
 	#drawOnRectangles(diffFromBlack_thresh,0,5)
 
         #out.write(image)
-	#image = cv2.resize(image,(640,360))
-	#cv2.imshow('original', image)
-	#cv2.moveWindow("original", 0,0)
+	image = cv2.resize(image,(640,360))
+	cv2.imshow('original', image)
+	cv2.moveWindow("original", 0,0)
 
 	#thresh2show = cv2.resize(diffFromBlack_thresh,(640,360))
 	#cv2.imshow('shadow based', thresh2show)

@@ -18,7 +18,11 @@ using namespace shapes;
 
 void filterBlack(const Mat&, Mat&, double);
 
+void getDiffImageInGray(const Mat&, const Mat&, Mat&, double = 10);
+
 double meanOfArea(const Mat&, const Mat&);
+
+double meanOfAsphalt();
 
 shapes::Rect getRect(double, double);
 

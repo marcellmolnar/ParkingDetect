@@ -17,11 +17,19 @@ void filterBlack(const Mat& imageHSV, Mat& imageGrayNew, double grayValue){
 	threshold(channels[2], imageGrayNew, double(255)-grayValue, 255, THRESH_BINARY_INV);
 }
 
+void getDiffImageInGray(const Mat& image1, const Mat& image2, Mat& result, double thresholdVal) {
+	threshold(image1 - image2, result, 10, 255, THRESH_BINARY);
+}
+
 double meanOfArea(const Mat& imageGray, const Mat& maskAsphalt) {
 	Scalar mean, stddev;
 	meanStdDev(imageGray, mean, stddev, maskAsphalt);
 	double meanval = mean.val[0];
 	return meanval;	
+}
+
+double meanOfAsphalt() {
+	return 0;
 }
 
 shapes::Rect getRect(double x, double width) {

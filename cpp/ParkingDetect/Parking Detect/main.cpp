@@ -11,6 +11,7 @@
 #include <sstream>
 //own
 #include "Utils.h"
+#include "draw.h"
 #include "constants.h"
 
 
@@ -74,10 +75,12 @@ void processVideo(char* videoFilename) {
 	//read input data
 	char keyboard = 0;
 	bool stop = false;
-	
+
 	Mat grayNew = Mat::zeros(H, W, CV_8UC1);
+	Mat diffImage = Mat::zeros(H, W, CV_8UC1);
 	Mat imageHSV = Mat::zeros(H, W, CV_8UC3);
-	Mat imageGray = Mat::zeros(H, W, CV_8UC3);
+	Mat imageGray = Mat::zeros(H, W, CV_8UC1);
+	Mat imageGrayLast = Mat::zeros(H, W, CV_8UC1);
 
 	// Mask for the asphalt
 	vector<cv::Point> points;
@@ -103,9 +106,20 @@ void processVideo(char* videoFilename) {
 		cvtColor(frame, imageHSV, COLOR_BGR2HSV);
 		filterBlack(imageHSV, grayNew, mean/2);
 		
+		getDiffImageInGray(imageGray, imageGrayLast, diffImage);
+
+		const int count = 89;
+		double percentages[count];
+		for (int i = 0; i < count; i++) {
+			percentages[i] = i;
+		}
+
+		drawStatisticsOnImage(frame, percentages, count);
+
 		//show the current frame
 		imshow("Frame", frame);
 
+		imageGrayLast = imageGray;
 		//get the input from the keyboard
 		keyboard = (char) waitKey(30);
 
