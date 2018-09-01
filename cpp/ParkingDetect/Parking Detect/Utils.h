@@ -24,6 +24,8 @@ double meanOfArea(const Mat&, const Mat&);
 
 double meanOfAsphalt();
 
+double calcNonZeroPixels(const Mat&, const Mat&, bool);
+
 shapes::Rect getRect(double, double);
 
 void draw_rectangle_on_image(Mat&, shapes::Rect, Scalar, int);

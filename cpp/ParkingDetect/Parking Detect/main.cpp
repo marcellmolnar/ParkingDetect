@@ -10,9 +10,10 @@
 #include <iostream>
 #include <sstream>
 //own
-#include "Utils.h"
-#include "draw.h"
 #include "constants.h"
+#include "detectCars.h"
+#include "draw.h"
+#include "Utils.h"
 
 
 using namespace cv;
@@ -91,6 +92,29 @@ void processVideo(char* videoFilename) {
 	Mat maskAsphalt = Mat::zeros(H, W, CV_8UC1);
 	fillConvexPoly(maskAsphalt, points, Scalar(255), CV_AA, 0);
 
+	Mat *spotMasks = new Mat[NUMBER_OF_POINTS];
+	
+	int currX = START_POINT;
+	int currIndex = 0;
+	while (currX > 60){
+		spotMasks[currIndex] = Mat::zeros(H, W, CV_8UC1);
+		shapes::Rect rect = getRect(currX, 50);
+		vector<cv::Point> points;
+		points.push_back(rect[0]);
+		points.push_back(rect[1]);
+		points.push_back(rect[2]);
+		points.push_back(rect[3]);
+		fillConvexPoly(spotMasks[currIndex], points, Scalar(255), CV_AA, 0);
+		currX -= 10;
+		currIndex++;
+	}
+	const int count = 89;
+	double percentages[count];
+	for (int i = 0; i < count; i++) {
+		percentages[i] = i;
+	}
+
+
 	std::cout << "starting video processing" << std::endl;
 	while (!stop && keyboard != 27) {
 		//read the current frame
@@ -101,18 +125,13 @@ void processVideo(char* videoFilename) {
 
 		cvtColor(frame, imageGray, COLOR_BGR2GRAY);
 		double mean = meanOfArea(imageGray, maskAsphalt);
-		std::cout << mean << std::endl;
-
+		
 		cvtColor(frame, imageHSV, COLOR_BGR2HSV);
-		filterBlack(imageHSV, grayNew, mean/2);
+		filterBlack(imageHSV, grayNew, mean);
 		
 		getDiffImageInGray(imageGray, imageGrayLast, diffImage);
 
-		const int count = 89;
-		double percentages[count];
-		for (int i = 0; i < count; i++) {
-			percentages[i] = i;
-		}
+		calcPercentages(grayNew, diffImage, spotMasks, percentages, count);
 
 		drawStatisticsOnImage(frame, percentages, count);
 

@@ -1,12 +1,14 @@
 #pragma once
+//opencv
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 #include "constants.h"
+//C++
+#include <iostream>
+//own
+#include "Utils.h"
 
 using namespace cv;
+using namespace std;
 
-double *percentages = new double[NUMBER_OF_POINTS]();
-double *percentagesToDraw = new double[NUMBER_OF_POINTS]();
-bool *canRefresh = new bool[NUMBER_OF_POINTS]();
-
-void calcPercentages(const Mat& thresh, const Mat& diffImage);
+void calcPercentages(const Mat& thresh, const Mat& diffImage, Mat* spotMasks, double* percentages, int count);

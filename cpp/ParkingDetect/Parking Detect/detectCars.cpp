@@ -1,11 +1,21 @@
 #include "detectCars.h"
 
-void calcPercentages(const Mat& thresh, const Mat& diffImage) {
+double *percentagesToDraw = new double[NUMBER_OF_POINTS]();
+bool *canRefresh = new bool[NUMBER_OF_POINTS]();
+
+void calcPercentages(const Mat& thresh, const Mat& diffImage, Mat* spotMasks, double* percentages, int count) {
+	if (count != NUMBER_OF_POINTS) {
+		cerr << "Unable to read next frame." << endl;
+		for (int i = 0; i < count; i++) {
+			percentages[i] = 0;
+		}
+		return;
+	}
 	int currX = 950;
 	int i = 0;
 	double *newPercentages = new double[NUMBER_OF_POINTS]();
 	while (currX > 60) {
-		double percentage = 50; // calcNonZeroPixels(thresh, mask = maskRectangles[i], percentage = true);
+		double percentage = calcNonZeroPixels(thresh, spotMasks[i], true);
 		double percentage_of_moving_objects = 2; // calcNonZeroPixels(diffImage, mask = maskRectangles[i], percentage = true);
 		newPercentages[i] = percentage;
 		if (percentage_of_moving_objects < 5)

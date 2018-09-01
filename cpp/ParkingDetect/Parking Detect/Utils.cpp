@@ -14,7 +14,7 @@ shapes::Point parking_zone_down[] = { shapes::Point(66, 284), shapes::Point(90, 
 void filterBlack(const Mat& imageHSV, Mat& imageGrayNew, double grayValue){
 	Mat channels[3];
 	split(imageHSV, channels);
-	threshold(channels[2], imageGrayNew, double(255)-grayValue, 255, THRESH_BINARY_INV);
+	threshold(channels[2], imageGrayNew, grayValue/2, 255, THRESH_BINARY_INV);
 }
 
 void getDiffImageInGray(const Mat& image1, const Mat& image2, Mat& result, double thresholdVal) {
@@ -26,6 +26,21 @@ double meanOfArea(const Mat& imageGray, const Mat& maskAsphalt) {
 	meanStdDev(imageGray, mean, stddev, maskAsphalt);
 	double meanval = mean.val[0];
 	return meanval;	
+}
+
+
+double calcNonZeroPixels(const Mat& blackAndWhite, const Mat& mask, bool percentage = true){
+	int maskSize = countNonZero(mask);
+
+	Mat blackAndWhite_masked = Mat::zeros(H, W, CV_8UC1);
+	bitwise_and(blackAndWhite, blackAndWhite, blackAndWhite_masked, mask);
+	int nonZeroPixels = countNonZero(blackAndWhite_masked);
+	if (maskSize == 0)
+		return 100;
+	if (percentage)
+		return 100 * nonZeroPixels / maskSize;
+	else
+		return nonZeroPixels;
 }
 
 double meanOfAsphalt() {
@@ -80,8 +95,6 @@ void drawOnRectangles(Mat& image, int start, int diff) {
 	if (diff < 5)
 		diff = 5;
 	while (currX > 60) {
-		//std::cout << i << std::endl;
-		//std::cout << "ok" << std::endl;
 		shapes::Rect rect = getRect(currX, 50);
 		currX -= 10 * diff;
 		draw_rectangle_on_image(image, rect, Scalar(0, 0, 255));

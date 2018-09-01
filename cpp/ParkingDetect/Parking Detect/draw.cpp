@@ -1,5 +1,14 @@
 #include "draw.h"
 
+// BGR colors
+const Scalar COLOR_BLACK = Scalar(0, 0, 0);
+const Scalar COLOR_WHITE = Scalar(255, 255, 255);
+const Scalar COLOR_BLUE = Scalar(255, 0, 0);
+const Scalar COLOR_RED = Scalar(0, 0, 255);
+const Scalar COLOR_GREEN = Scalar(0, 255, 0);
+const Scalar COLOR_YELLOW = Scalar(0, 255, 255);
+
+
 void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
 	const int minY = 500;
 	const int maxY = 200;
