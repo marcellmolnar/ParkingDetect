@@ -29,6 +29,7 @@ bool steppedPlay = false;
 void processVideo(char* videoFilename);
 bool handleKeyPress(char k);
 void filterBlack(const Mat& image, Mat& imageGrayNew, double grayValue);
+double fps();
 
 int main(int argc, char* argv[])
 {
@@ -96,7 +97,7 @@ void processVideo(char* videoFilename) {
 	
 	int currX = START_POINT;
 	int currIndex = 0;
-	while (currX > 60){
+	while (currX > END_POINT){
 		spotMasks[currIndex] = Mat::zeros(H, W, CV_8UC1);
 		shapes::Rect rect = getRect(currX, 50);
 		vector<cv::Point> points;
@@ -127,11 +128,21 @@ void processVideo(char* videoFilename) {
 		double mean = meanOfArea(imageGray, maskAsphalt);
 		
 		cvtColor(frame, imageHSV, COLOR_BGR2HSV);
-		filterBlack(imageHSV, grayNew, mean);
+		//filterBlack(imageHSV, grayNew, mean);
+		threshold(imageGray, grayNew, mean / 2, 255, THRESH_BINARY_INV);
 		
 		getDiffImageInGray(imageGray, imageGrayLast, diffImage);
 
 		calcPercentages(grayNew, diffImage, spotMasks, percentages, count);
+
+		int numberOfCars = 0;
+		int* positions = calcParkinglotsStatus(frame, percentages, count, numberOfCars);
+
+		/*cout << "Number of cars: " << numberOfCars << endl;
+		for (int i = 0; i < numberOfCars; i++) {
+			cout << positions[i] << " ";
+		}
+		cout << endl;*/
 
 		drawStatisticsOnImage(frame, percentages, count);
 
@@ -139,6 +150,9 @@ void processVideo(char* videoFilename) {
 		imshow("Frame", frame);
 
 		imageGrayLast = imageGray;
+
+		cout << "FPS: " << fps() << endl;
+
 		//get the input from the keyboard
 		keyboard = (char) waitKey(30);
 
@@ -187,6 +201,26 @@ bool handleKeyPress(char k) {
 	return false;
 }
 
+
+clock_t last_time;
+
+double clockToMilliseconds(clock_t ticks) {
+	// units/(units/time) => time (seconds) * 1000 = milliseconds
+	return (ticks / (double)CLOCKS_PER_SEC)*1000.0;
+}
+
+double fps(){
+	clock_t time_now = clock();
+
+	clock_t deltaTime = time_now - last_time;
+
+	double timeMillis = clockToMilliseconds(deltaTime);
+	double frameRate = 0;
+	if (timeMillis > 0.001)
+		frameRate = 1000 / timeMillis;
+	last_time = time_now;
+	return frameRate;
+}
 
 /*
 

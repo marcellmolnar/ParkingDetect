@@ -12,3 +12,5 @@ using namespace cv;
 using namespace std;
 
 void calcPercentages(const Mat& thresh, const Mat& diffImage, Mat* spotMasks, double* percentages, int count);
+
+int* calcParkinglotsStatus(Mat& image, double* percentages, int count, int& numberOfCars);

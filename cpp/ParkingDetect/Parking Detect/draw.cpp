@@ -10,14 +10,12 @@ const Scalar COLOR_YELLOW = Scalar(0, 255, 255);
 
 
 void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
-	const int minY = 500;
-	const int maxY = 200;
 	if (count != NUMBER_OF_POINTS) {
 		cerr << "Unable to read next frame." << endl;
 		return;
 	}
-	double scale = (minY - maxY) / 100;
-	double gridHeight = (minY - maxY) / 5;
+	double scale = (graphMinY - graphMaxY) / 100;
+	double gridHeight = (graphMinY - graphMaxY) / 5;
 	int currX = START_POINT - STEP_SIZE;
 	double last_percentage = percentages[0];
 	double avg = 0;
@@ -34,13 +32,13 @@ void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
 			color = COLOR_GREEN;
 		else
 			color = COLOR_RED;
-		line(image, Point(currX + STEP_SIZE, minY - last_percentage * scale), Point(currX, minY - percentage * scale), color, 2);
+		line(image, Point(currX + STEP_SIZE, graphMinY - last_percentage * scale), Point(currX, graphMinY - percentage * scale), color, 2);
 		last_percentage = percentage;
 		currX -= 10;
 	}
 
 	for (int i = 1; i < 11; i++) {
-		line(image, Point(START_POINT - i * 100, maxY), Point(START_POINT - i * 100, minY), (255,255,255), 1);
+		line(image, Point(START_POINT - i * 100, graphMaxY), Point(START_POINT - i * 100, graphMinY), (255,255,255), 1);
 		char str[5];
 		strcpy(str, "");
 		char space;
@@ -48,15 +46,15 @@ void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
 			strcat(str, " ");
 		std::ostringstream oss;
 		oss << str << (START_POINT - i * 100);
-		putText(image, oss.str(), Point(START_POINT - i * 100 - 30, minY + 40), 1, 2, COLOR_YELLOW, 3);
+		putText(image, oss.str(), Point(START_POINT - i * 100 - 30, graphMinY + 40), 1, 2, COLOR_YELLOW, 3);
 	}
 	// vertical axis
-	line(image, Point(50, maxY), Point(50, minY), COLOR_BLUE, 2);
-	line(image, Point(40, maxY + 20), Point(50, maxY), COLOR_BLUE, 2);
-	line(image, Point(60, maxY + 20), Point(50, maxY), COLOR_BLUE, 2);
-	putText(image, "Percentage [%]", Point(40, maxY - 20), 1, 2, COLOR_YELLOW, 3);
+	line(image, Point(50, graphMaxY), Point(50, graphMinY), COLOR_BLUE, 2);
+	line(image, Point(40, graphMaxY + 20), Point(50, graphMaxY), COLOR_BLUE, 2);
+	line(image, Point(60, graphMaxY + 20), Point(50, graphMaxY), COLOR_BLUE, 2);
+	putText(image, "Percentage [%]", Point(40, graphMaxY - 20), 1, 2, COLOR_YELLOW, 3);
 	for (int i = 0; i < 6; i++) {
-		line(image, Point(50, minY - i * gridHeight), Point(START_POINT, minY - i * gridHeight), COLOR_WHITE, 1);
+		line(image, Point(50, graphMinY - i * gridHeight), Point(START_POINT, graphMinY - i * gridHeight), COLOR_WHITE, 1);
 		char str[5];
 		strcpy(str, "");
 		char space;
@@ -64,13 +62,13 @@ void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
 			strcat(str, " ");
 		std::ostringstream oss;
 		oss << str << (i * 20);
-		putText(image, oss.str(), Point(5, minY - i * gridHeight + 10), 1, 2, COLOR_YELLOW, 3);
+		putText(image, oss.str(), Point(5, graphMinY - i * gridHeight + 10), 1, 2, COLOR_YELLOW, 3);
 	}
 
 	// horizontal axis
-	line(image, Point(50, minY), Point(START_POINT, minY), COLOR_BLUE, 2);
-	line(image, Point(START_POINT - 10, minY - 10), Point(START_POINT, minY), COLOR_BLUE, 2);
-	line(image, Point(START_POINT - 10, minY + 10), Point(START_POINT, minY), COLOR_BLUE, 2);
-	putText(image, "X coord.", Point(START_POINT - 20, minY + 40), 1, 2, COLOR_YELLOW, 3);
+	line(image, Point(50, graphMinY), Point(START_POINT, graphMinY), COLOR_BLUE, 2);
+	line(image, Point(START_POINT - 10, graphMinY - 10), Point(START_POINT, graphMinY), COLOR_BLUE, 2);
+	line(image, Point(START_POINT - 10, graphMinY + 10), Point(START_POINT, graphMinY), COLOR_BLUE, 2);
+	putText(image, "X coord.", Point(START_POINT - 20, graphMinY + 40), 1, 2, COLOR_YELLOW, 3);
 
 }
