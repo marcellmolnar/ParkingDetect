@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "constants.h"
 
+using namespace std;
 using namespace cv;
 using namespace shapes;
 

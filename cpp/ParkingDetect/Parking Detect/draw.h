@@ -1,5 +1,5 @@
 #pragma once
-// opencv
+//opencv
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 #include "opencv2/videoio.hpp"
@@ -14,5 +14,5 @@
 using namespace cv;
 using namespace std;
 
-
+// Draws graph of the percentages and a coordinate system for it.
 void drawStatisticsOnImage(Mat&, double percentages[], int count);

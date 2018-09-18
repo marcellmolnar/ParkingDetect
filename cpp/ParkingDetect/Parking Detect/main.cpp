@@ -21,20 +21,20 @@ using namespace std;
 
 
 Mat frame, gray;
-Mat background;
-Mat background_gray;
 
-bool steppedPlay = false;
+// Only for background subtraction.
+/*Mat background;
+Mat background_gray;*/
 
-void processVideo(char* videoFilename);
-bool handleKeyPress(char k);
-void filterBlack(const Mat& image, Mat& imageGrayNew, double grayValue);
+void processVideo(char*);
+double updateAsphaltColor(double, double, double*, int);
+bool handleKeyPress(char, bool&);
+void filterBlack(const Mat&, Mat&, double);
 double fps();
 
 int main(int argc, char* argv[])
 {
 	std::cout << "app started" << std::endl;
-	steppedPlay = false;
 
 	Parking_lot p(shapes::Point(522, 272), shapes::Point(560, 299), shapes::Point(835, 307), shapes::Point(835, 280));
 		
@@ -44,7 +44,8 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	background = imread("bg.jpg", IMREAD_COLOR); // Load an image
+	// Only for background subtraction.
+	/*background = imread("bg.jpg", IMREAD_COLOR); // Load an image
 	if (background.empty())
 	{
 		cerr << "No background image found!" << endl;
@@ -52,13 +53,23 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 	std::cout << "bckgnd opened" << std::endl;
-	cvtColor(background, background_gray, COLOR_BGR2GRAY);
+	cvtColor(background, background_gray, COLOR_BGR2GRAY);*/
 
+	// create window
 	namedWindow("Frame");
-	std::cout << "window created" << std::endl;
+	//namedWindow("Frame2");
+	std::cout << "window(s) created" << std::endl;
 
-	processVideo(argv[1]);
+	// Name and full path of the video.
+	char file[52+2+4+2];
+	strcpy(file, "C:/Users/Marci/Desktop/Smart City/Park Detect/vids/");
+	strcat(file, argv[1]);
+	strcat(file, ".mp4");
 
+	// Process the video
+	processVideo(file);
+
+	// Close all.
 	destroyAllWindows();
 	return EXIT_SUCCESS;
 }
@@ -74,8 +85,12 @@ void processVideo(char* videoFilename) {
 	}
 	std::cout << "video opened: " << videoFilename << std::endl;
 
-	//read input data
+	// for storing input data
 	char keyboard = 0;
+	// When paused, pressing 'd' will jump to the next frame. FPS is not going to be correct.
+	// Pressing space will pause the processing, but won't destroy it.
+	// Pressing ESC will close the application.
+	bool steppedPlay = false;
 	bool stop = false;
 
 	Mat grayNew = Mat::zeros(H, W, CV_8UC1);
@@ -95,6 +110,7 @@ void processVideo(char* videoFilename) {
 
 	Mat *spotMasks = new Mat[NUMBER_OF_POINTS];
 	
+	// generate the masks for the spots
 	int currX = START_POINT;
 	int currIndex = 0;
 	while (currX > END_POINT){
@@ -106,57 +122,64 @@ void processVideo(char* videoFilename) {
 		points.push_back(rect[2]);
 		points.push_back(rect[3]);
 		fillConvexPoly(spotMasks[currIndex], points, Scalar(255), CV_AA, 0);
-		currX -= 10;
+		currX -= STEP_SIZE;
 		currIndex++;
 	}
-	const int count = 89;
+	const int count = NUMBER_OF_POINTS;
 	double percentages[count];
 	for (int i = 0; i < count; i++) {
 		percentages[i] = i;
 	}
 
+	const int numberOfValues = 5;
+	double grayValues[count];
+	for (int i = 0; i < numberOfValues; i++) {
+		grayValues[i] = 0;
+	}
 
 	std::cout << "starting video processing" << std::endl;
 	while (!stop && keyboard != 27) {
-		//read the current frame
-		if (!capture.read(frame)) {
-			cerr << "Unable to read next frame." << endl;
-			break;
+		for (int i = 0; i < 1; i++) {
+			//read the current frame
+			if (!capture.read(frame)) {
+				cerr << "Unable to read next frame." << endl;
+				break;
+			}
 		}
 
 		cvtColor(frame, imageGray, COLOR_BGR2GRAY);
 		double mean = meanOfArea(imageGray, maskAsphalt);
-		
+		double percentage_of_moving_objects_at_the_asphalt = calcNonZeroPixels(diffImage, maskAsphalt, false);
+
+		mean = updateAsphaltColor(mean, percentage_of_moving_objects_at_the_asphalt, grayValues, numberOfValues);
+
+		cout << "mean: " << mean << endl;
+
 		cvtColor(frame, imageHSV, COLOR_BGR2HSV);
 		//filterBlack(imageHSV, grayNew, mean);
 		threshold(imageGray, grayNew, mean / 2, 255, THRESH_BINARY_INV);
 		
 		getDiffImageInGray(imageGray, imageGrayLast, diffImage);
-
+		
 		calcPercentages(grayNew, diffImage, spotMasks, percentages, count);
 
 		int numberOfCars = 0;
 		int* positions = calcParkinglotsStatus(frame, percentages, count, numberOfCars);
-
-		/*cout << "Number of cars: " << numberOfCars << endl;
-		for (int i = 0; i < numberOfCars; i++) {
-			cout << positions[i] << " ";
-		}
-		cout << endl;*/
-
+		
 		drawStatisticsOnImage(frame, percentages, count);
 
 		//show the current frame
 		imshow("Frame", frame);
+		//imshow("Frame2", maskAsphalt);
 
-		imageGrayLast = imageGray;
+		imageGray.copyTo(imageGrayLast);
 
 		cout << "FPS: " << fps() << endl;
 
 		//get the input from the keyboard
 		keyboard = (char) waitKey(30);
 
-		stop = handleKeyPress(keyboard);
+		stop = handleKeyPress(keyboard, steppedPlay);
 		if (keyboard == 27) {
 			stop = true;
 		}
@@ -168,10 +191,32 @@ void processVideo(char* videoFilename) {
 	std::cout << "video released" << std::endl;
 }
 
+/* Color of asphalt tracker. Only update when there are no movement, and we take the average of numberOfValues values. */
+double updateAsphaltColor(double value, double numberOfWhitePixels, double* grayValues, int numberOfValues) {
+	static int count = 0;
+	static double avg = 0;
+	if (numberOfWhitePixels < 30) {
+		if (count > 0) {
+			avg *= count;
+			avg -= grayValues[0];
+		}
+		if (count < numberOfValues)
+			count++;
+		for (int i = 0; i < numberOfValues - 1; i++) {
+			grayValues[i] = grayValues[i + 1];
+		}
+		grayValues[numberOfValues - 1] = value;
+
+		avg += value;
+		avg /= count;
+		cout << avg << endl;
+	}
+	return avg;
+}
 
 /* Returns true if we should close the app (ESC pressed).
    If space is pressed, then pause the processing and wait until space is pressed again. */
-bool handleKeyPress(char k) {
+bool handleKeyPress(char k, bool& steppedPlay) {
 	// 32 == Space ,    27 == ESC
 	if (k == 32 || steppedPlay){
 		bool close = false;

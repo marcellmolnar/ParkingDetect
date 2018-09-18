@@ -24,6 +24,7 @@ double meanOfArea(const Mat&, const Mat&);
 
 double meanOfAsphalt();
 
+// Calulates the number of the non-zero-valued pixels of an area. (or the percentage to the area size)
 double calcNonZeroPixels(const Mat&, const Mat&, bool);
 
 shapes::Rect getRect(double, double);
