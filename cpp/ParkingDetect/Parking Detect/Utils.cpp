@@ -89,7 +89,7 @@ void draw_rectangle_on_image(Mat& image, shapes::Rect rect, Scalar color, int wi
 };
 
 void drawOnRectangles(Mat& image, int start, int diff) {
-	double currX = 950 - start * 10;
+	double currX = 950 - start * STEP_SIZE;
 	int i = start;
 	if (i < 0)
 		i = 0;
@@ -97,7 +97,7 @@ void drawOnRectangles(Mat& image, int start, int diff) {
 		diff = 5;
 	while (currX > 60) {
 		shapes::Rect rect = getRect(currX, 50);
-		currX -= 10 * diff;
+		currX -= STEP_SIZE * diff;
 		draw_rectangle_on_image(image, rect, Scalar(0, 0, 255));
 		i += diff;
 	}

@@ -139,24 +139,27 @@ void processVideo(char* videoFilename) {
 
 	std::cout << "starting video processing" << std::endl;
 	while (!stop && keyboard != 27) {
+		bool brek = false;
 		for (int i = 0; i < 1; i++) {
 			//read the current frame
 			if (!capture.read(frame)) {
 				cerr << "Unable to read next frame." << endl;
-				break;
+				brek = true;
 			}
 		}
+		if (brek)
+			break;
 
-		cvtColor(frame, imageGray, COLOR_BGR2GRAY);
+		//cvtColor(frame, imageGray, COLOR_BGR2GRAY);
 		double mean = meanOfArea(imageGray, maskAsphalt);
 		double percentage_of_moving_objects_at_the_asphalt = calcNonZeroPixels(diffImage, maskAsphalt, false);
 
 		mean = updateAsphaltColor(mean, percentage_of_moving_objects_at_the_asphalt, grayValues, numberOfValues);
-
 		cout << "mean: " << mean << endl;
 
-		cvtColor(frame, imageHSV, COLOR_BGR2HSV);
+		//cvtColor(frame, imageHSV, COLOR_BGR2HSV);
 		//filterBlack(imageHSV, grayNew, mean);
+		
 		threshold(imageGray, grayNew, mean / 2, 255, THRESH_BINARY_INV);
 		
 		getDiffImageInGray(imageGray, imageGrayLast, diffImage);
@@ -171,13 +174,13 @@ void processVideo(char* videoFilename) {
 		//show the current frame
 		imshow("Frame", frame);
 		//imshow("Frame2", maskAsphalt);
-
+		
 		imageGray.copyTo(imageGrayLast);
 
 		cout << "FPS: " << fps() << endl;
 
 		//get the input from the keyboard
-		keyboard = (char) waitKey(30);
+		keyboard = (char) waitKey(5);
 
 		stop = handleKeyPress(keyboard, steppedPlay);
 		if (keyboard == 27) {

@@ -23,12 +23,12 @@ void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
 		last_percentage = percentage;
 		currX -= STEP_SIZE;
 	}
-	return; // fps drops when drawing the coordinate system
+	//return; // fps drops when drawing the coordinate system
 
 	double gridHeight = (graphMinY - graphMaxY) / 5;
 	// vertical grid
-	for (int i = 1; i < 11; i++) {
-		line(image, Point(START_POINT - i * 100, graphMaxY), Point(START_POINT - i * 100, graphMinY), (255,255,255), 1);
+	for (int i = 0; i < 11; i++) {
+		line(image, Point(START_POINT - i * 100, graphMaxY), Point(START_POINT - i * 100, graphMinY), COLOR_WHITE, 1);
 		char str[5];
 		strcpy(str, "");
 		char space;
@@ -36,13 +36,13 @@ void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
 			strcat(str, " ");
 		std::ostringstream oss;
 		oss << str << (START_POINT - i * 100);
-		putText(image, oss.str(), Point(START_POINT - i * 100 - 30, graphMinY + 40), 1, 2, COLOR_YELLOW, 3);
+		putText(image, oss.str(), Point(START_POINT - i * 100 - 30, graphMinY + 40), 1, 2, COLOR_YELLOW, 2);
 	}
 	// vertical axis
 	line(image, Point(50, graphMaxY), Point(50, graphMinY), COLOR_BLUE, 2);
 	line(image, Point(40, graphMaxY + 20), Point(50, graphMaxY), COLOR_BLUE, 2);
 	line(image, Point(60, graphMaxY + 20), Point(50, graphMaxY), COLOR_BLUE, 2);
-	putText(image, "Percentage [%]", Point(40, graphMaxY - 20), 1, 2, COLOR_YELLOW, 3);
+	putText(image, "Percentage [%]", Point(40, graphMaxY - 20), 1, 2, COLOR_YELLOW, 2);
 
 
 	// horizontal grid
@@ -55,13 +55,13 @@ void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
 			strcat(str, " ");
 		std::ostringstream oss;
 		oss << str << (i * 20);
-		putText(image, oss.str(), Point(5, graphMinY - i * gridHeight + 10), 1, 2, COLOR_YELLOW, 3);
+		putText(image, oss.str(), Point(5, graphMinY - i * gridHeight + 10), 1, 2, COLOR_YELLOW, 2);
 	}
 
 	// horizontal axis
 	line(image, Point(50, graphMinY), Point(START_POINT, graphMinY), COLOR_BLUE, 2);
-	line(image, Point(START_POINT - 10, graphMinY - 10), Point(START_POINT, graphMinY), COLOR_BLUE, 2);
-	line(image, Point(START_POINT - 10, graphMinY + 10), Point(START_POINT, graphMinY), COLOR_BLUE, 2);
-	putText(image, "X coord.", Point(START_POINT - 20, graphMinY + 40), 1, 2, COLOR_YELLOW, 3);
+	line(image, Point(START_POINT - STEP_SIZE, graphMinY - STEP_SIZE), Point(START_POINT, graphMinY), COLOR_BLUE, 2);
+	line(image, Point(START_POINT - STEP_SIZE, graphMinY + STEP_SIZE), Point(START_POINT, graphMinY), COLOR_BLUE, 2);
+	putText(image, "X coord.", Point(START_POINT - 20, graphMinY + 40), 1, 2, COLOR_YELLOW, 2);
 
 }

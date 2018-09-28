@@ -10,7 +10,10 @@ const uint16_t W = 1280;
 const int START_POINT = 950;
 const int END_POINT = 60;
 const int STEP_SIZE = 10;
-const int NUMBER_OF_POINTS = (START_POINT - END_POINT) / STEP_SIZE;
+// if STEP_SIZE is divider of (START_POINT - END_POINT) then the division's result will less than the actual quotient
+//   but we correct it.
+// if STEP_SIZE is NOT divider of (START_POINT - END_POINT) then the division's result won't change, but we round it up
+const int NUMBER_OF_POINTS = 1 + (START_POINT - END_POINT - 1) / STEP_SIZE;
 
 
 const int graphMinY = 500;

@@ -94,7 +94,7 @@ int* calcParkinglotsStatus(Mat& image, double* percentages, int count, int& numb
 		if (percentage < last_percentage && ascending) {
 			ascending = false;
 			// if we are above some threshold and far enough from the last car then it is another car
-			if (last_percentage > 15 and distance_from_last_rect > 70 * rectWidthScale) {
+			if (last_percentage > 5 and distance_from_last_rect > 70 * rectWidthScale) {
 				int width = int(80 * rectWidthScale);
 				//rect = getRect(currX, width);
 				//parkingCarsNow.append(Parking_lot(rect));
