@@ -1,6 +1,9 @@
 #include "draw.h"
 
-void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
+using namespace cv;
+using namespace std;
+
+void Drawer::drawStatisticsOnImage(Mat& image, double percentages[], int count) {
 	if (count != NUMBER_OF_POINTS) {
 		cerr << "Unable to read next frame." << endl;
 		return;

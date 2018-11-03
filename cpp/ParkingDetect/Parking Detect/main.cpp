@@ -9,28 +9,57 @@
 //C++
 #include <iostream>
 #include <sstream>
+#include <thread>
 //own
 #include "constants.h"
 #include "detectCars.h"
 #include "draw.h"
 #include "Utils.h"
 
+//TBB
+#include "tbb/tbb.h"
 
 using namespace cv;
 using namespace std;
 
+bool logTimes = false;
 
-Mat frame, gray;
+#define LOG_TIMES false
+
+
 
 // Only for background subtraction.
 /*Mat background;
 Mat background_gray;*/
 
-void processVideo(char*);
-double updateAsphaltColor(double, double, double*, int);
+void processVideo(char*, int);
 bool handleKeyPress(char, bool&);
-void filterBlack(const Mat&, Mat&, double);
 double fps();
+
+class AsphaltHandler {
+	int count = 0;
+	double avg = 0;
+public:
+	/* Color of asphalt tracker. Only update when there are no movement, and we take the average of numberOfValues values. */
+	double updateAsphaltColor(double value, double numberOfWhitePixels, double* grayValues, int numberOfValues) {
+		if (numberOfWhitePixels < 30) {
+			if (count > 0) {
+				avg *= count;
+				avg -= grayValues[0];
+			}
+			if (count < numberOfValues)
+				count++;
+			for (int i = 0; i < numberOfValues - 1; i++) {
+				grayValues[i] = grayValues[i + 1];
+			}
+			grayValues[numberOfValues - 1] = value;
+
+			avg += value;
+			avg /= count;
+		}
+		return avg;
+	}
+};
 
 int main(int argc, char* argv[])
 {
@@ -56,25 +85,54 @@ int main(int argc, char* argv[])
 	cvtColor(background, background_gray, COLOR_BGR2GRAY);*/
 
 	// create window
-	namedWindow("Frame");
-	//namedWindow("Frame2");
+	namedWindow("Frame0");
 	std::cout << "window(s) created" << std::endl;
 
 	// Name and full path of the video.
 	char file[52+2+4+2];
-	strcpy(file, "C:/Users/Marci/Desktop/Smart City/Park Detect/vids/");
-	strcat(file, argv[1]);
-	strcat(file, ".mp4");
+	strcpy_s(file, "C:/Users/Marci/Desktop/Smart City/Park Detect/vids/");
+	strcat_s(file, argv[1]);
+	strcat_s(file, ".mp4");
 
-	// Process the video
-	processVideo(file);
+	// s.mp4
+	char file2[52+2+4+2] = "C:/Users/Marci/Desktop/Smart City/Park Detect/vids/5.mp4";
+
+	char *files[2] = { file, file2 };
+
+	int numberOfThreads = 2;
+
+	/*parallel_for_(Range(0, numberOfThreads), [&](const Range& range) {
+		for (int r = range.start; r < range.end; r++)
+		{
+			// Process the video
+			processVideo(files[r], r);
+		}
+	});*/
+
+	/*std::thread first(processVideo, files[0], 0);
+	std::thread second(processVideo, files[1], 1);
+
+	first.join();
+	second.join();*/
+	std::thread second(processVideo, files[1], 1);
+	processVideo(files[0], 0);
+	second.join();
 
 	// Close all.
 	destroyAllWindows();
 	return EXIT_SUCCESS;
 }
 
-void processVideo(char* videoFilename) {
+void processVideo(char* videoFilename, int frameNumber) {
+
+	Drawer drawer;
+	DetectCars detectCars;
+	Utils utils;
+	AsphaltHandler asphaltHandler;
+
+	Mat frame, gray;
+	Mat frame2;
+
 	//create the capture object
 	VideoCapture capture(videoFilename);
 
@@ -106,7 +164,7 @@ void processVideo(char* videoFilename) {
 	points.push_back(cv::Point(835, 307));
 	points.push_back(cv::Point(835, 280));
 	Mat maskAsphalt = Mat::zeros(H, W, CV_8UC1);
-	fillConvexPoly(maskAsphalt, points, Scalar(255), CV_AA, 0);
+	cv::fillConvexPoly(maskAsphalt, points, Scalar(255), CV_AA, 0);
 
 	Mat *spotMasks = new Mat[NUMBER_OF_POINTS];
 	
@@ -115,13 +173,13 @@ void processVideo(char* videoFilename) {
 	int currIndex = 0;
 	while (currX > END_POINT){
 		spotMasks[currIndex] = Mat::zeros(H, W, CV_8UC1);
-		shapes::Rect rect = getRect(currX, 50);
+		shapes::Rect rect = utils.getRect(currX, 50);
 		vector<cv::Point> points;
 		points.push_back(rect[0]);
 		points.push_back(rect[1]);
 		points.push_back(rect[2]);
 		points.push_back(rect[3]);
-		fillConvexPoly(spotMasks[currIndex], points, Scalar(255), CV_AA, 0);
+		cv::fillConvexPoly(spotMasks[currIndex], points, Scalar(255), CV_AA, 0);
 		currX -= STEP_SIZE;
 		currIndex++;
 	}
@@ -132,7 +190,7 @@ void processVideo(char* videoFilename) {
 	}
 
 	const int numberOfValues = 5;
-	double grayValues[count];
+	double grayValues[numberOfValues];
 	for (int i = 0; i < numberOfValues; i++) {
 		grayValues[i] = 0;
 	}
@@ -150,37 +208,82 @@ void processVideo(char* videoFilename) {
 		if (brek)
 			break;
 
-		//cvtColor(frame, imageGray, COLOR_BGR2GRAY);
-		double mean = meanOfArea(imageGray, maskAsphalt);
-		double percentage_of_moving_objects_at_the_asphalt = calcNonZeroPixels(diffImage, maskAsphalt, false);
 
-		mean = updateAsphaltColor(mean, percentage_of_moving_objects_at_the_asphalt, grayValues, numberOfValues);
-		cout << "mean: " << mean << endl;
 
+		double t2;
+		if (logTimes) t2 = (double)getTickCount();
+		cvtColor(frame, imageGray, COLOR_BGR2GRAY);
+		double mean = utils.meanOfArea(imageGray, maskAsphalt);
+		double percentage_of_moving_objects_at_the_asphalt = utils.calcNonZeroPixels(diffImage, maskAsphalt, false);
+
+		
+		mean = asphaltHandler.updateAsphaltColor(mean, percentage_of_moving_objects_at_the_asphalt, grayValues, numberOfValues);
 		//cvtColor(frame, imageHSV, COLOR_BGR2HSV);
 		//filterBlack(imageHSV, grayNew, mean);
-		
+		if (logTimes) t2 = ((double)getTickCount() - t2) / getTickFrequency();
+		if (logTimes) std::cout << "asphalt proc: " << t2 * 1000 << " s" << endl;
+
+
+#if LOG_TIMES
+		t2 = (double)getTickCount();
+#endif
 		threshold(imageGray, grayNew, mean / 2, 255, THRESH_BINARY_INV);
 		
-		getDiffImageInGray(imageGray, imageGrayLast, diffImage);
-		
-		calcPercentages(grayNew, diffImage, spotMasks, percentages, count);
+		utils.getDiffImageInGray(imageGray, imageGrayLast, diffImage);
 
+#if LOG_TIMES
+		t2 = ((double)getTickCount() - t2) / getTickFrequency();
+		std::cout << "image preproc: " << t2 * 1000 << " s" << endl;
+#endif
+
+
+
+#if LOG_TIMES
+		t2 = (double)getTickCount();
+#endif
+		detectCars.calcPercentages(utils, grayNew, diffImage, spotMasks, percentages, count);
+#if LOG_TIMES
+		t2 = ((double)getTickCount() - t2) / getTickFrequency();
+		std::cout << "calcing percentages: " << t2 * 1000 << " s" << endl;
+#endif
+
+
+#if LOG_TIMES
+		t2 = (double)getTickCount();
+#endif
 		int numberOfCars = 0;
-		int* positions = calcParkinglotsStatus(frame, percentages, count, numberOfCars);
-		
-		drawStatisticsOnImage(frame, percentages, count);
+		int* positions = detectCars.calcParkinglotsStatus(frame, percentages, count, numberOfCars);
+#if LOG_TIMES
+		t2 = ((double)getTickCount() - t2) / getTickFrequency();
+		std::cout << "calcing statuses: " << t2 * 1000 << " s" << endl;
+#endif
+
+
+#if LOG_TIMES
+		t2 = (double)getTickCount();
+#endif
+		drawer.drawStatisticsOnImage(frame, percentages, count);
+#if LOG_TIMES
+		t2 = ((double)getTickCount() - t2) / getTickFrequency();
+		std::cout << "drawing: " << t2 * 1000 << " s" << endl;
+#endif
+
 
 		//show the current frame
-		imshow("Frame", frame);
-		//imshow("Frame2", maskAsphalt);
+		std::string s = "Frame";
+		s += std::to_string(frameNumber);
+		cv::imshow(s, frame);
 		
 		imageGray.copyTo(imageGrayLast);
 
-		cout << "FPS: " << fps() << endl;
+		if (frameNumber == 0){
+			std::cout << "FPS: " << fps() << endl;
+			std::cout << endl;
+			std::cout << endl;
+		}
 
 		//get the input from the keyboard
-		keyboard = (char) waitKey(5);
+		keyboard = (char) waitKey(1);
 
 		stop = handleKeyPress(keyboard, steppedPlay);
 		if (keyboard == 27) {
@@ -192,29 +295,6 @@ void processVideo(char* videoFilename) {
 	//delete capture object
 	capture.release();
 	std::cout << "video released" << std::endl;
-}
-
-/* Color of asphalt tracker. Only update when there are no movement, and we take the average of numberOfValues values. */
-double updateAsphaltColor(double value, double numberOfWhitePixels, double* grayValues, int numberOfValues) {
-	static int count = 0;
-	static double avg = 0;
-	if (numberOfWhitePixels < 30) {
-		if (count > 0) {
-			avg *= count;
-			avg -= grayValues[0];
-		}
-		if (count < numberOfValues)
-			count++;
-		for (int i = 0; i < numberOfValues - 1; i++) {
-			grayValues[i] = grayValues[i + 1];
-		}
-		grayValues[numberOfValues - 1] = value;
-
-		avg += value;
-		avg /= count;
-		cout << avg << endl;
-	}
-	return avg;
 }
 
 /* Returns true if we should close the app (ESC pressed).
