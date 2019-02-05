@@ -13,22 +13,19 @@
 //own
 #include "Parking_lot.h"
 
-using namespace cv;
-using namespace shapes;
+void filterBlack(const cv::Mat&, cv::Mat&, double);
 
-void filterBlack(const Mat&, Mat&, double);
+void getDiffImageInGray(const cv::Mat&, const cv::Mat&, cv::Mat&, double = 10);
 
-void getDiffImageInGray(const Mat&, const Mat&, Mat&, double = 10);
-
-double meanOfArea(const Mat&, const Mat&);
+double meanOfArea(const cv::Mat&, const cv::Mat&);
 
 double meanOfAsphalt();
 
 // Calulates the number of the non-zero-valued pixels of an area. (or the percentage to the area size)
-double calcNonZeroPixels(const Mat&, const Mat&, bool);
+double calcNonZeroPixels(const cv::Mat&, const cv::Mat&, bool);
 
 shapes::Rect getRect(double, double);
 
-void draw_rectangle_on_image(Mat&, shapes::Rect, Scalar, int);
+void draw_rectangle_on_image(cv::Mat&, shapes::Rect, cv::Scalar, int);
 
-void drawOnRectangles(Mat&, int, int);
+void drawOnRectangles(cv::Mat&, int, int);

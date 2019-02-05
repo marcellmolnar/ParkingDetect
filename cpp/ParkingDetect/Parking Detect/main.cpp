@@ -15,12 +15,15 @@
 #include "draw.h"
 #include "Utils.h"
 
+//TBB
+#include "tbb/tbb.h"
 
 using namespace cv;
 using namespace std;
 
 
 Mat frame, gray;
+Mat frame2;
 
 // Only for background subtraction.
 /*Mat background;
@@ -57,14 +60,14 @@ int main(int argc, char* argv[])
 
 	// create window
 	namedWindow("Frame");
-	//namedWindow("Frame2");
+	namedWindow("Frame2");
 	std::cout << "window(s) created" << std::endl;
 
 	// Name and full path of the video.
 	char file[52+2+4+2];
-	strcpy(file, "C:/Users/Marci/Desktop/Smart City/Park Detect/vids/");
-	strcat(file, argv[1]);
-	strcat(file, ".mp4");
+	strcpy_s(file, "C:/Users/Marci/Desktop/Smart City/Park Detect/vids/");
+	strcat_s(file, argv[1]);
+	strcat_s(file, ".mp4");
 
 	// Process the video
 	processVideo(file);
@@ -77,8 +80,14 @@ int main(int argc, char* argv[])
 void processVideo(char* videoFilename) {
 	//create the capture object
 	VideoCapture capture(videoFilename);
+	VideoCapture capture2("C:/Users/Marci/Desktop/Smart City/Park Detect/vids/s.mp4");
 
 	if (!capture.isOpened()) {
+		//error in opening the video input
+		cerr << "Unable to open video file: " << videoFilename << endl;
+		exit(EXIT_FAILURE);
+	}
+	if (!capture2.isOpened()) {
 		//error in opening the video input
 		cerr << "Unable to open video file: " << videoFilename << endl;
 		exit(EXIT_FAILURE);
@@ -149,13 +158,16 @@ void processVideo(char* videoFilename) {
 		}
 		if (brek)
 			break;
-
-		//cvtColor(frame, imageGray, COLOR_BGR2GRAY);
+		if (!capture2.read(frame2)) {
+			cerr << "Unable to read next frame." << endl;
+			break;
+		}
+		cvtColor(frame, imageGray, COLOR_BGR2GRAY);
 		double mean = meanOfArea(imageGray, maskAsphalt);
 		double percentage_of_moving_objects_at_the_asphalt = calcNonZeroPixels(diffImage, maskAsphalt, false);
 
-		mean = updateAsphaltColor(mean, percentage_of_moving_objects_at_the_asphalt, grayValues, numberOfValues);
 		cout << "mean: " << mean << endl;
+		mean = updateAsphaltColor(mean, percentage_of_moving_objects_at_the_asphalt, grayValues, numberOfValues);
 
 		//cvtColor(frame, imageHSV, COLOR_BGR2HSV);
 		//filterBlack(imageHSV, grayNew, mean);
@@ -173,11 +185,13 @@ void processVideo(char* videoFilename) {
 
 		//show the current frame
 		imshow("Frame", frame);
-		//imshow("Frame2", maskAsphalt);
+		imshow("Frame2", frame2);
 		
 		imageGray.copyTo(imageGrayLast);
 
 		cout << "FPS: " << fps() << endl;
+		cout << endl;
+		cout << endl;
 
 		//get the input from the keyboard
 		keyboard = (char) waitKey(5);
@@ -212,7 +226,6 @@ double updateAsphaltColor(double value, double numberOfWhitePixels, double* gray
 
 		avg += value;
 		avg /= count;
-		cout << avg << endl;
 	}
 	return avg;
 }

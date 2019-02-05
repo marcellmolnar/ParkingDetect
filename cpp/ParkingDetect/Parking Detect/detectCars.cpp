@@ -1,5 +1,8 @@
 #include "detectCars.h"
 
+using namespace cv;
+using namespace std;
+
 double *percentagesToDraw = new double[NUMBER_OF_POINTS]();
 bool *canRefresh = new bool[NUMBER_OF_POINTS]();
 
@@ -31,22 +34,22 @@ void calcPercentages(const Mat& thresh, const Mat& diffImage, Mat* spotMasks, do
 	// Refresh only when there is no movement at the adjacent spots.
 	for (int i = 0; i < NUMBER_OF_POINTS; i++) {
 		bool refresh = true;
-		if (i > 0 and canRefresh[i - 1] == false)
+		if (i > 0 && canRefresh[i - 1] == false)
 			refresh = false;
-		if (i > 1 and canRefresh[i - 2] == false)
+		if (i > 1 && canRefresh[i - 2] == false)
 			refresh = false;
-		if (i > 2 and canRefresh[i - 3] == false)
+		if (i > 2 && canRefresh[i - 3] == false)
 			refresh = false;
-		if (i > 3 and canRefresh[i - 4] == false)
+		if (i > 3 && canRefresh[i - 4] == false)
 			refresh = false;
 
-		if (i < NUMBER_OF_POINTS - 1 and canRefresh[i + 1] == false)
+		if (i < NUMBER_OF_POINTS - 1 && canRefresh[i + 1] == false)
 			refresh = false;
-		if (i < NUMBER_OF_POINTS - 2 and canRefresh[i + 2] == false)
+		if (i < NUMBER_OF_POINTS - 2 && canRefresh[i + 2] == false)
 			refresh = false;
-		if (i < NUMBER_OF_POINTS - 3 and canRefresh[i + 3] == false)
+		if (i < NUMBER_OF_POINTS - 3 && canRefresh[i + 3] == false)
 			refresh = false;
-		if (i < NUMBER_OF_POINTS - 4 and canRefresh[i + 4] == false)
+		if (i < NUMBER_OF_POINTS - 4 && canRefresh[i + 4] == false)
 			refresh = false;
 
 		if (refresh)
@@ -89,19 +92,19 @@ int* calcParkinglotsStatus(Mat& image, double* percentages, int count, int& numb
 	while (currX > END_POINT) {
 		// scale for descend the witdh of the rectangles because the farther we look, the smaller are the cars
 		double rectWidthScale = 1 - 0.80*(START_POINT - currX) / (START_POINT - END_POINT);
-		double percentage = percentagesToDraw[i];
+		double percentage = percentages[i];
 		// it can be a car when it is a local maximum on the graph (see image after the drawStatisticsOnImage() function called)
 		if (percentage < last_percentage && ascending) {
 			ascending = false;
 			// if we are above some threshold and far enough from the last car then it is another car
-			if (last_percentage > 5 and distance_from_last_rect > 70 * rectWidthScale) {
+			if (last_percentage > 5 && distance_from_last_rect > 50 * rectWidthScale) {
 				int width = int(80 * rectWidthScale);
 				//rect = getRect(currX, width);
 				//parkingCarsNow.append(Parking_lot(rect));
 				parkingCarsNow[position] = currX;
 				position += 1; if (position == 20) position = 19; // don't try to write a 21st 
 				// draw a point at this car's position
-				circle(image, cv::Point(currX + STEP_SIZE + 10, graphMinY - last_percentage * scale), circleRadius, COLOR_YELLOW, circleThickness);
+				circle(image, cv::Point(currX + STEP_SIZE, graphMinY - percentages[i-1] * scale), circleRadius, COLOR_YELLOW, circleThickness);
 				distance_from_last_rect = 0;
 			}
 		}

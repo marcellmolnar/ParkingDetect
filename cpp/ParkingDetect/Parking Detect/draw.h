@@ -11,8 +11,5 @@
 //own
 #include "constants.h"
 
-using namespace cv;
-using namespace std;
-
 // Draws graph of the percentages and a coordinate system for it.
-void drawStatisticsOnImage(Mat&, double percentages[], int count);
+void drawStatisticsOnImage(cv::Mat&, double percentages[], int count);

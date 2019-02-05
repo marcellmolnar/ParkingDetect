@@ -54,24 +54,24 @@ shapes::Rect getRect(double x, double width) {
 	double slide = (-30 * (1030 - x) / (1030 - 60)) / 2;
 
 	uint16_t index = 1;
-	while (index < parking_zone_down_LENGTH - 1 and parking_zone_down[index][0] < x - width / 2 + slide)
+	while (index < parking_zone_down_LENGTH - 1 && parking_zone_down[index][0] < x - width / 2 + slide)
 		index += 1;
 	double rate2 = double((parking_zone_down[index][0] - x + width / 2 - slide)) / (parking_zone_down[index][0] - parking_zone_down[index - 1][0]);
 	shapes::Point corner2(x - width / 2 + slide, int(parking_zone_down[index][1] + (parking_zone_down[index - 1][1] - parking_zone_down[index][1])*rate2));
 
-	while (index < parking_zone_down_LENGTH - 1 and parking_zone_down[index][0] < x + width / 2 + slide)
+	while (index < parking_zone_down_LENGTH - 1 && parking_zone_down[index][0] < x + width / 2 + slide)
 		index += 1;
 	double rate3 = double((parking_zone_down[index][0] - x - width / 2 - slide)) / (parking_zone_down[index][0] - parking_zone_down[index - 1][0]);
 	shapes::Point corner3(x + width / 2 + slide, int(parking_zone_down[index][1] + (parking_zone_down[index - 1][1] - parking_zone_down[index][1])*rate3));
 
 
 	index = 1;
-	while (index < parking_zone_up_LENGTH - 1 and parking_zone_up[index][0] < x - width / 2 - slide)
+	while (index < parking_zone_up_LENGTH - 1 && parking_zone_up[index][0] < x - width / 2 - slide)
 		index += 1;
 	double rate1 = double((parking_zone_up[index][0] - x + width / 2 + slide)) / (parking_zone_up[index][0] - parking_zone_up[index - 1][0]);
 	shapes::Point corner1(x - width / 2 - slide, int(parking_zone_up[index][1] + (parking_zone_up[index - 1][1] - parking_zone_up[index][1])*rate1));
 
-	while (index < parking_zone_up_LENGTH - 1 and parking_zone_up[index][0] < x + width / 2 - slide)
+	while (index < parking_zone_up_LENGTH - 1 && parking_zone_up[index][0] < x + width / 2 - slide)
 		index += 1;
 	double rate4 = double((parking_zone_up[index][0] - x - width / 2 + slide)) / (parking_zone_up[index][0] - parking_zone_up[index - 1][0]);
 	shapes::Point corner4(x + width / 2 - slide, int(parking_zone_up[index][1] + (parking_zone_up[index - 1][1] - parking_zone_up[index][1])*rate4));

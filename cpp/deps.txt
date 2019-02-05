@@ -1,0 +1,8 @@
+OpenCV:
+C/C++ General:  C:\Users\Marci\Documents\opencv\build\include
+Linker / Input: (Release) C:\Users\Marci\Documents\opencv\build\x64\vc15\lib\opencv_world341.lib
+				(Debug)   C:\Users\Marci\Documents\opencv\build\x64\vc15\lib\opencv_world341d.lib
+
+TBB:
+C/C++ General:  C:\Users\Marci\Documents\tbb2018\tbb2018_20180822oss\include
+Linker / Input: C:\Users\Marci\Documents\tbb2018\tbb2018_20180822oss\lib\intel64\vc14\tbb_debug.lib

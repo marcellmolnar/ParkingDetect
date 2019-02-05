@@ -1,5 +1,8 @@
 #include "draw.h"
 
+using namespace cv;
+using namespace std;
+
 void drawStatisticsOnImage(Mat& image, double percentages[], int count) {
 	if (count != NUMBER_OF_POINTS) {
 		cerr << "Unable to read next frame." << endl;
