@@ -1,4 +1,5 @@
 # ParkingDetect
 Parking detector
 
-This branch is with threads.
+Detects cars in the parking lot. The placement of the parking lot should be adjusted.
+Python prototype. C++ application.
