@@ -23,7 +23,7 @@
     <ProjectGuid>{441A6FD4-89DD-4C55-BB06-EEB389B06031}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ParkingDetect</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -104,13 +104,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Marci\Documents\opencv\build\include;$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv\build\include;$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Marci\Documents\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>C:\Users\Marci\Documents\opencv\build\x64\vc15\lib\opencv_world341d.lib;C:\Users\Marci\Documents\tbb2018\tbb2018_20180822oss\lib\intel64\vc14\tbb_debug.lib</AdditionalDependencies>
+      <AdditionalDependencies>C:\opencv\build\x64\vc15\lib\opencv_world345d.lib;C:\tbb2019_20181203oss\lib\intel64\vc14\tbb_debug.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -152,18 +152,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AsphaltHandler.cpp" />
+    <ClCompile Include="carHandler.cpp" />
     <ClCompile Include="detectCars.cpp" />
     <ClCompile Include="draw.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="not_used_code_snippets.cpp" />
     <ClCompile Include="Parking_lot.cpp" />
+    <ClCompile Include="Parking_spot.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="video_processor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AsphaltHandler.h" />
+    <ClInclude Include="carHandler.h" />
     <ClInclude Include="detectCars.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="draw.h" />
     <ClInclude Include="Parking_lot.h" />
+    <ClInclude Include="Parking_spot.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="video_processor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

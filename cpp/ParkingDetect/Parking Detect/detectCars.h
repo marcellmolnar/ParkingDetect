@@ -2,10 +2,10 @@
 //opencv
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
-#include "constants.h"
 //C++
 #include <iostream>
 //own
+#include "constants.h"
 #include "Utils.h"
 
 class DetectCars{

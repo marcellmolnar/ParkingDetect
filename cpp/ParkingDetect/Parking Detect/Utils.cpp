@@ -15,7 +15,7 @@ shapes::Point parking_zone_down[] = { shapes::Point(66, 284), shapes::Point(90, 
 void Utils::filterBlack(const Mat& imageHSV, Mat& imageGrayNew, double grayValue){
 	Mat channels[3];
 	split(imageHSV, channels);
-	threshold(channels[2], imageGrayNew, grayValue/2, 255, THRESH_BINARY_INV);
+	threshold(channels[2], imageGrayNew, grayValue, 255, THRESH_BINARY_INV);
 }
 
 void Utils::getDiffImageInGray(const Mat& image1, const Mat& image2, Mat& result, double thresholdVal) {
@@ -29,6 +29,9 @@ double Utils::meanOfArea(const Mat& imageGray, const Mat& maskAsphalt) {
 	return meanval;	
 }
 
+double Utils::meanOfAsphalt() {
+	return 0;
+}
 
 double Utils::calcNonZeroPixels(const Mat& blackAndWhite, const Mat& mask, bool percentage = true) const {
 	int maskSize = countNonZero(mask);
@@ -42,10 +45,6 @@ double Utils::calcNonZeroPixels(const Mat& blackAndWhite, const Mat& mask, bool 
 		return 100 * nonZeroPixels / maskSize;
 	else
 		return nonZeroPixels;
-}
-
-double Utils::meanOfAsphalt() {
-	return 0;
 }
 
 shapes::Rect Utils::getRect(double x, double width) {

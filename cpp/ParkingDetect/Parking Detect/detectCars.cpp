@@ -27,7 +27,7 @@ void DetectCars::calcPercentages(const Utils& utils, const Mat& thresh, const Ma
 			double percentage_of_moving_objects = utils.calcNonZeroPixels(diffImage, spotMasks[r], true);
 			newPercentages[r] = percentage;
 			// Don't refresh when there is some moving object..
-			if (percentage_of_moving_objects < 5)
+			if (percentage_of_moving_objects < 2)
 				canRefresh[r] = true;
 			else
 				canRefresh[r] = false;
@@ -96,14 +96,16 @@ int* DetectCars::calcParkinglotsStatus(Mat& image, double* percentages, int coun
 		i += 1;
 		percentagesToDraw[i] = percentages[i];
 	}
+	// change percentages to the averaged ones
+	percentages = percentagesToDraw;
 	
-	// x coordinates of the parking cars
+	// x coordinates of the parking cars (list of max 20)
 	int* parkingCarsNow = new int[20]();
 	// number of parking cars
 	int position = 0;
 
-	double last_percentage = 100;
-	bool ascending = false;
+	double last_percentage = percentages[0]+0.1;
+	bool ascending = (percentages[0] > 10);
 
 	int currX = START_POINT;
 	i = 0;
@@ -117,14 +119,21 @@ int* DetectCars::calcParkinglotsStatus(Mat& image, double* percentages, int coun
 		if (percentage < last_percentage && ascending) {
 			ascending = false;
 			// if we are above some threshold and far enough from the last car then it is another car
-			if (last_percentage > 5 && distance_from_last_rect > 50 * rectWidthScale) {
+			if (last_percentage > THRESH_2_DETECT_CAR && distance_from_last_rect > MIN_DISTANCE_BETWEEN_CARS * rectWidthScale) {
+
 				int width = int(80 * rectWidthScale);
 				//rect = getRect(currX, width);
 				//parkingCarsNow.append(Parking_lot(rect));
 				parkingCarsNow[position] = currX;
 				position += 1; if (position == 20) position = 19; // don't try to write a 21st 
 				// draw a point at this car's position
-				circle(image, cv::Point(currX + STEP_SIZE, graphMinY - percentages[i-1] * scale), circleRadius, COLOR_YELLOW, circleThickness);
+				if (currX == START_POINT) {
+					circle(image, cv::Point(currX, graphMinY - last_percentage * scale), circleRadius, COLOR_YELLOW, -1);
+				}
+				else {
+					if (currX > MIN_COORDINATE)
+					circle(image, cv::Point(currX + STEP_SIZE, graphMinY - last_percentage * scale), circleRadius, COLOR_YELLOW, -1);
+				}
 				distance_from_last_rect = 0;
 			}
 		}
@@ -135,9 +144,6 @@ int* DetectCars::calcParkinglotsStatus(Mat& image, double* percentages, int coun
 		i += 1;
 		distance_from_last_rect += STEP_SIZE;
 	}
-
-	// change percentages to the averaged ones
-	percentages = percentagesToDraw;
 	// save the number of detected cars
 	numberOfCars = position;
 	// return with the array of the parking cars' x coordinates

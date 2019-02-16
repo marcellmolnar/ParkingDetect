@@ -67,4 +67,7 @@ void Drawer::drawStatisticsOnImage(Mat& image, double percentages[], int count) 
 	line(image, Point(START_POINT - STEP_SIZE, graphMinY + STEP_SIZE), Point(START_POINT, graphMinY), COLOR_BLUE, 2);
 	putText(image, "X coord.", Point(START_POINT - 20, graphMinY + 40), 1, 2, COLOR_YELLOW, 2);
 
+	// border for detection
+	line(image, Point(MIN_COORDINATE, 0), Point(MIN_COORDINATE, H), COLOR_RED, 4);
+
 }
